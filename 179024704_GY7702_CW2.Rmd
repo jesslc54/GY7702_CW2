@@ -5,7 +5,9 @@ date: "22/12/2020"
 output: pdf_document
 ---
  This document was written in RMarkdown by opening a new R Markdown saved under GY7702_Coursework file and then Knit to a pdf file.
+ 
 A GitHub was also created for this coursework.
+
 GitHub link: https://github.com/jesslc54/GY7702_CW2
 
 # **Option A** 
@@ -13,6 +15,7 @@ GitHub link: https://github.com/jesslc54/GY7702_CW2
 Conduct an exploratory analysis of the variables listed below, from the 2011_OAC_Raw_kVariables.csv dataset, for the OAs in the LAD assigned to you in the table in the Appendix. Include the code, the output (can include graphics) and a description of the findings. The latter should be up to 500 words and it can be written as a final discussion after the analysis, or as a description of each step of the analysis, or a combination of the two.
 
 VariableCode= VariableName
+
 k004= Persons aged 45 to 64
 
 k009= Persons aged over 16 who are single
@@ -20,8 +23,11 @@ k009= Persons aged over 16 who are single
 k010= Persons aged over 16 who are married or in a registered same-sex civil partnership
 
 k027= Households who live in a detached house or bungalow
+
 k031= Households who own or have shared ownership of property
+
 k041= Households with two or more cars or vans
+
 k046= Employed persons aged between 16 and 74 who work part-time
 
 Variable codes used throughout instead of variable name as more concise.
@@ -172,7 +178,11 @@ hyndburn_2011OAC_stat_desc %>%
 
 
 # Question A.2
-# Multiple Regression Model and Analysis
+## Use the variables explored in Question A.1 to create a robust, multiple linear regression model having as outcome (dependent) variable the presence (per OA in the LAD assigned to you in the table in the Appendix) of households who own or have shared ownership of property. Present the model that achieves the best fit and the process through which it has been identified. Include the code, the output (can include graphics), a final model. The latter two should be up to 500 words and it can be written as a final discussion after the analysis, or as a description of each step of the analysis, or a combination of the two.
+
+##property ownershipi = (model) + errori
+
+##Alternatively, if no robust model or no significant model can be created for the LAD assigned to you, include the code and the output (can include graphics) that illustrate that finding, and a related discussion (still, up to 500 words). The latter could be written as a final discussion after the analysis, or as a description of each step of the analysis, or a combination of the two 
 
 ```{r, message=FALSE, warning=FALSE}
 # load magrittr and stargazer library
@@ -181,7 +191,7 @@ library(stargazer)
 library(lmtest)
 library(lm.beta)
 ```
-
+# Multiple Regression Model and Analysis
 ```{r, message=FALSE, warning=FALSE}
 hyndburn_2011OAC_norm <-
   hyndburn_2011OAC %>%
@@ -262,11 +272,13 @@ The output above suggests that the model is fit (F(6,262)= 128, p<.001) where th
 hyndburn_household_model %>%
   plot()
 ```
+
 normal Q-Q plot shows high normality of the residuals 
 
 ```{r}
 lm.beta(hyndburn_household_model)
 ```
+
 perc_k010 and perc_041 standardized coefficients shows that if persons aged over 16 who are married or in a registered same-sex civil partnership; or  Households with two or more cars or vans increased then so would the households who own or have shared ownership of property, whereas the other variables would have a negative impact.
 
 
