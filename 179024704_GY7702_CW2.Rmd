@@ -1,0 +1,276 @@
+---
+title: "GY7702_CW2_179024704"
+author: "Jess Campbell"
+date: "22/12/2020"
+output: pdf_document
+---
+ This document was written in RMarkdown by opening a new R Markdown saved under GY7702_Coursework file and then Knit to a pdf file.
+A GitHub was also created for this coursework.
+GitHub link: https://github.com/jesslc54/GY7702_CW2
+
+# **Option A** 
+## Question A.1
+Conduct an exploratory analysis of the variables listed below, from the 2011_OAC_Raw_kVariables.csv dataset, for the OAs in the LAD assigned to you in the table in the Appendix. Include the code, the output (can include graphics) and a description of the findings. The latter should be up to 500 words and it can be written as a final discussion after the analysis, or as a description of each step of the analysis, or a combination of the two.
+
+VariableCode= VariableName
+k004= Persons aged 45 to 64
+
+k009= Persons aged over 16 who are single
+
+k010= Persons aged over 16 who are married or in a registered same-sex civil partnership
+
+k027= Households who live in a detached house or bungalow
+k031= Households who own or have shared ownership of property
+k041= Households with two or more cars or vans
+k046= Employed persons aged between 16 and 74 who work part-time
+
+Variable codes used throughout instead of variable name as more concise.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Load libraries
+```{r load_libraries, warning=FALSE, message=FALSE}
+# load tidyverse and knitr libraries 
+library(tidyverse)
+library(knitr)
+```
+### Load data 
+```{r, warning=FALSE, message=FALSE}
+# upload .cvs files
+# read and name the .cvs files
+raw_2011OAC<- read_csv("2011_OAC_Raw_kVariables.csv") 
+census_OA <- read_csv("OA11_LSOA11_MSOA11_LAD11_EW_LUv2.csv")
+```
+### Join data and filter/ rename for Hyndburn
+```{r, warning=FALSE, message=FALSE}
+
+# rename resulting table 
+hyndburn_2011OAC <-
+# full join tables by output area
+  dplyr::full_join(
+   census_OA, raw_2011OAC,
+  by = c("OA11CD" = "OA")
+)%>%
+#filter to only show Hyndburn data
+  dplyr::filter(
+    LAD11NM == "Hyndburn"
+  ) %>%
+# select only relevent columns in table
+  dplyr::select(
+    "LAD11NM",
+    "Total_Population",
+    "Total_Households",
+    "Total_Employment_16_to_74",
+    "k004", "k009", "k010", "k027", "k031", "k041", "k046"
+    )
+ 
+```
+# Exploratory Data Analysis
+### Plot for  persons aged 45 to 64
+```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+# 
+hyndburn_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = k004
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 3) +
+  ggplot2::theme_bw()
+```
+
+
+### Plot for persons aged over 16 who are single
+```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4 }
+hyndburn_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = k009
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 5) +
+  ggplot2::theme_bw()
+```
+
+### Plot for persons aged over 16 who are married or in a registered same-sex civil partnership
+```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+hyndburn_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = k010
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 8) +
+  ggplot2::theme_bw()
+```
+
+
+### Plot for households who live in a detached house or bungalow
+```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+hyndburn_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = k027
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 5) +
+  ggplot2::theme_bw()
+```
+
+
+### Plot for households who own or have shared ownership of property
+```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+hyndburn_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = k031
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 5) +
+  ggplot2::theme_bw()
+```
+
+
+
+### plot for households with two or more cars or vans
+```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+hyndburn_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = k041
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 5) +
+  ggplot2::theme_bw()
+```
+
+
+### Plot for employed persons aged between 16 and 74 who work part-time
+```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+hyndburn_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = k046
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 3) +
+  ggplot2::theme_bw()
+```
+
+
+## Desciptive statistic of each variable 
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+hyndburn_2011OAC_stat_desc <- hyndburn_2011OAC %>%
+  dplyr::select(k004, k009, k010, k027, k031, k041, k046) %>%
+  pastecs::stat.desc(norm = TRUE)
+  
+hyndburn_2011OAC_stat_desc %>%
+  knitr::kable(digits = 3)
+```
+
+
+
+# Question A.2
+# Multiple Regression Model and Analysis
+
+```{r, message=FALSE, warning=FALSE}
+# load magrittr and stargazer library
+library(magrittr)
+library(stargazer)
+library(lmtest)
+library(lm.beta)
+```
+
+```{r, message=FALSE, warning=FALSE}
+hyndburn_2011OAC_norm <-
+  hyndburn_2011OAC %>%
+  dplyr::select(
+Total_Population, Total_Households, Total_Employment_16_to_74,
+k031, k004, k009, k010, k027, k041, k046
+  ) %>%
+  # percentage number of households
+  dplyr::mutate(
+    k027 = (k027 / Total_Households) * 100
+  ) %>%
+  # percentage across household columns
+  dplyr::mutate(
+    dplyr::across( 
+      k031:k041,
+      function(x){ (x / Total_Households) * 100 }
+    )
+  ) %>%
+# percentage number of population
+  dplyr::mutate(
+    k004 = (k004 / Total_Population) * 100
+  ) %>%
+  # percentage across population columns
+  dplyr::mutate(
+    dplyr::across( 
+      k009:k010,
+      function(x){ (x / Total_Population) * 100 }
+    )
+  ) %>%
+# percentage number of employment
+  dplyr::mutate(
+    k046 = (k046/ Total_Employment_16_to_74) * 100 
+  ) %>%
+  # rename columns
+  dplyr::rename_with(
+    function(x){ paste0("perc_", x) },
+    c(k027, k031, k041, k004, k009, k010, k046)
+  )
+```
+
+
+```{r}
+hyndburn_household_model <-
+  hyndburn_2011OAC_norm %$%
+  lm(
+    perc_k031 ~ 
+    perc_k004 + perc_k009 + perc_k010 + perc_k027 + perc_k041 + perc_k046  
+  )
+hyndburn_household_model %>%
+  summary()
+```
+
+
+
+```{r}
+# shapiro-wilks test
+hyndburn_household_model %>% 
+  stats::rstandard() %>% 
+  stats::shapiro.test()
+```
+
+```{r}
+# breusch-pagan test 
+hyndburn_household_model %>% 
+  lmtest::bptest()
+```
+
+```{r}
+# durbin-watson test 
+hyndburn_household_model %>%
+  lmtest::dwtest()
+```
+
+###Discussion
+The output above suggests that the model is fit (F(6,262)= 128, p<.001) where the p value is significant, indicating that a model based on households, population and emplyment variables can account for 73.97% of households who own or have shared ownership of property. However the model is only partially robust. The residuals are normally distributed (Shapiro-Wilk test, W= 0.98, p= 0.02 ) but the residuals don’t satisfy the homoscedasticity assumption (Breusch-Pagan test,  BP=27.5, p= <.001), nor the independence assumption (Durbin-Watson test,  DW=1.86, p <.001)
+
+```{r, message=FALSE, warning=FALSE}
+hyndburn_household_model %>%
+  plot()
+```
+normal Q-Q plot shows high normality of the residuals 
+
+```{r}
+lm.beta(hyndburn_household_model)
+```
+perc_k010 and perc_041 standardized coefficients shows that if persons aged over 16 who are married or in a registered same-sex civil partnership; or  Households with two or more cars or vans increased then so would the households who own or have shared ownership of property, whereas the other variables would have a negative impact.
+
+
+```{r cars, message=FALSE, warning=FALSE}
+summary(cars)
+```
+
